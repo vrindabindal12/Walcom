@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 interface Product {
   id: string;
@@ -13,6 +13,8 @@ interface Product {
   reviews_count: number;
   brand: string;
   discount_percentage?: number;
+  category: string;
+  description?: string;
 }
 
 const FeaturedProducts = () => {
@@ -25,7 +27,7 @@ const FeaturedProducts = () => {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .limit(8);
+          .limit(12);
 
         if (error) throw error;
         setProducts(data || []);
@@ -84,9 +86,12 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-shadow">
+          <Link 
+            to="/products"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-shadow inline-block"
+          >
             View All Products
-          </button>
+          </Link>
         </div>
       </div>
     </section>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 const Header = () => {
   const { user, signOut } = useAuth();
-  const { itemCount } = useCart();
+  const { itemCount, totalAmount } = useCart();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -21,6 +21,14 @@ const Header = () => {
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
     }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
@@ -97,7 +105,7 @@ const Header = () => {
               <div className="hidden md:block">
                 <div className="text-xs text-gray-500">Cart</div>
                 <div className="text-sm font-semibold">
-                  ₹{itemCount > 0 ? '0.00' : '0.00'}
+                  {formatPrice(totalAmount)}
                 </div>
               </div>
             </Link>
