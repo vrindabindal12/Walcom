@@ -75,7 +75,7 @@ const Login = () => {
                 {isLogin ? 'Welcome Back' : 'Create Account'}
               </CardTitle>
               <p className="text-gray-600">
-                {isLogin ? 'Sign in to your account' : 'Join ShopIndia today'}
+                {isLogin ? 'Sign in to your account' : 'Join Walmart today'}
               </p>
             </CardHeader>
             

@@ -8,8 +8,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xl px-3 py-2 rounded-lg mb-4 inline-block">
-              ShopIndia
+            <div className="bg-gradient-to-r from-blue-500 to-blue-400 text-white font-bold text-xl px-3 py-2 rounded-lg mb-4 inline-block">
+              Walmart
             </div>
             <p className="text-gray-400 mb-4">
               India's favorite shopping destination with millions of products at unbeatable prices.
@@ -67,7 +67,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 ShopIndia. All rights reserved.
+              © 2024 Walmart. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors text-sm">
