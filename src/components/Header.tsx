@@ -97,7 +97,7 @@ const Header = () => {
               <div className="hidden md:block">
                 <div className="text-xs text-gray-500">Cart</div>
                 <div className="text-sm font-semibold">
-                  ${itemCount > 0 ? '0.00' : '0.00'}
+                  ₹{itemCount > 0 ? '0.00' : '0.00'}
                 </div>
               </div>
             </Link>
