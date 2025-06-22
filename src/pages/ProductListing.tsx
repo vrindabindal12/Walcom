@@ -46,7 +46,7 @@ const ProductListing = () => {
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [filters, setFilters] = useState<FilterState>({
     brands: [],
@@ -110,7 +110,10 @@ const ProductListing = () => {
     const searchQuery = searchParams.get('search');
     const categoryParam = searchParams.get('category');
     
-    if (categoryParam && !filters.categories.includes(categoryParam)) {
+    // Reset filters when navigating to "All" products
+    if (!categoryParam && !searchQuery) {
+      setFilters(prev => ({ ...prev, categories: [] }));
+    } else if (categoryParam && !filters.categories.includes(categoryParam)) {
       setFilters(prev => ({ ...prev, categories: [categoryParam] }));
     }
 
@@ -212,6 +215,8 @@ const ProductListing = () => {
       inStock: false,
       discountedOnly: false,
     });
+    // Clear URL params as well
+    setSearchParams({});
   };
 
   const getActiveFiltersCount = () => {
