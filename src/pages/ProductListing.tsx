@@ -106,17 +106,29 @@ const ProductListing = () => {
     fetchProducts();
   }, []);
 
+  // Handle URL parameters and set initial filters
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    const discountedParam = searchParams.get('discounted');
+    
+    if (categoryParam && allCategories.includes(categoryParam)) {
+      setFilters(prev => ({
+        ...prev,
+        categories: [categoryParam]
+      }));
+    }
+    
+    if (discountedParam === 'true') {
+      setFilters(prev => ({
+        ...prev,
+        discountedOnly: true
+      }));
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const searchQuery = searchParams.get('search');
-    const categoryParam = searchParams.get('category');
     
-    // Reset filters when navigating to "All" products
-    if (!categoryParam && !searchQuery) {
-      setFilters(prev => ({ ...prev, categories: [] }));
-    } else if (categoryParam && !filters.categories.includes(categoryParam)) {
-      setFilters(prev => ({ ...prev, categories: [categoryParam] }));
-    }
-
     let filtered = products;
 
     // Search filter
@@ -268,6 +280,12 @@ const ProductListing = () => {
     switch (tag.type) {
       case 'category':
         toggleArrayFilter('categories', tag.value);
+        // Also clear URL param when removing category filter
+        if (searchParams.get('category') === tag.value) {
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete('category');
+          setSearchParams(newParams);
+        }
         break;
       case 'brand':
         toggleArrayFilter('brands', tag.value);
@@ -286,6 +304,12 @@ const ProductListing = () => {
         break;
       case 'discount':
         updateFilter('discountedOnly', false);
+        // Also clear URL param when removing discount filter
+        if (searchParams.get('discounted') === 'true') {
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete('discounted');
+          setSearchParams(newParams);
+        }
         break;
       case 'price':
         updateFilter('priceRange', [0, 200000]);
@@ -298,6 +322,23 @@ const ProductListing = () => {
       return categoryData[filters.categories[0] as keyof typeof categoryData];
     }
     return null;
+  };
+
+  const handleCategoryChange = (category: string) => {
+    const newCategories = filters.categories.includes(category)
+      ? filters.categories.filter(item => item !== category)
+      : [...filters.categories, category];
+    
+    setFilters(prev => ({ ...prev, categories: newCategories }));
+    
+    // Update URL params
+    const newParams = new URLSearchParams(searchParams);
+    if (newCategories.length === 1) {
+      newParams.set('category', newCategories[0]);
+    } else {
+      newParams.delete('category');
+    }
+    setSearchParams(newParams);
   };
 
   if (loading) {
@@ -472,7 +513,7 @@ const ProductListing = () => {
                         <Checkbox
                           id={`category-${category}`}
                           checked={filters.categories.includes(category)}
-                          onCheckedChange={() => toggleArrayFilter('categories', category)}
+                          onCheckedChange={() => handleCategoryChange(category)}
                         />
                         <Label htmlFor={`category-${category}`} className="text-sm font-medium">
                           {category}
