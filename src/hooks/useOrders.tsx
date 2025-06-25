@@ -31,7 +31,7 @@ interface Order {
 
 interface OrderContextType {
   orders: Order[];
-  createOrder: (cartItems: any[], totalAmount: number, shippingAddress: string) => Promise<string | null>;
+  createOrder: (cartItems: any[], totalAmount: number, shippingAddress?: string) => Promise<string | null>;
   getOrder: (orderId: string) => Order | null;
   loading: boolean;
   refreshOrders: () => Promise<void>;
@@ -99,7 +99,18 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return null;
     }
 
+    if (!cartItems || cartItems.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Add some items to your cart before placing an order",
+        variant: "destructive"
+      });
+      return null;
+    }
+
     try {
+      console.log('Creating order with:', { cartItems, totalAmount, shippingAddress });
+
       // Create the order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -112,7 +123,12 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error('Order creation error:', orderError);
+        throw orderError;
+      }
+
+      console.log('Order created:', orderData);
 
       // Create order items
       const orderItems = cartItems.map(item => ({
@@ -122,18 +138,25 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         price: item.products.price
       }));
 
+      console.log('Creating order items:', orderItems);
+
       const { error: itemsError } = await supabase
         .from('order_items')
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Order items creation error:', itemsError);
+        throw itemsError;
+      }
+
+      console.log('Order items created successfully');
 
       // Refresh orders to include the new one
       await fetchOrders();
 
       toast({
         title: "Order placed successfully!",
-        description: `Order #${orderData.id.slice(-8)} has been created`,
+        description: `Order #${orderData.id.slice(-8).toUpperCase()} has been created`,
       });
 
       return orderData.id;
@@ -141,7 +164,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('Error creating order:', error);
       toast({
         title: "Order failed",
-        description: "Please try again later",
+        description: error.message || "Please try again later",
         variant: "destructive"
       });
       return null;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -15,6 +15,7 @@ const Cart = () => {
   const { createOrder } = useOrders();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -110,14 +111,34 @@ const Cart = () => {
       return;
     }
 
+    setIsProcessing(true);
+
     try {
-      const orderId = await createOrder(cartItems, totalAmount);
+      console.log('Starting checkout process...');
+      console.log('Cart items:', cartItems);
+      console.log('Total amount:', totalAmount);
+
+      const orderId = await createOrder(cartItems, totalAmount, "Default Address");
+      
       if (orderId) {
+        console.log('Order created successfully with ID:', orderId);
+        // Clear cart after successful order creation
         await clearCart();
+        // Navigate to order confirmation page
         navigate(`/order-confirmation/${orderId}`);
+      } else {
+        console.log('Order creation failed - no order ID returned');
+        // Error toast is already shown by createOrder function
       }
     } catch (error) {
       console.error('Checkout error:', error);
+      toast({
+        title: "Checkout failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -242,8 +263,9 @@ const Cart = () => {
                   onClick={handleCheckout}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                   size="lg"
+                  disabled={isProcessing || cartItems.length === 0}
                 >
-                  Proceed to Checkout
+                  {isProcessing ? 'Processing...' : 'Proceed to Checkout'}
                 </Button>
               </div>
             </div>
