@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, LogOut, Package, Zap } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, LogOut, Package, Zap, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
@@ -73,6 +73,19 @@ const Header = () => {
                 <span className="hidden md:block text-sm text-gray-700 font-medium">
                   Hi, {user.user_metadata?.full_name?.split(' ')[0] || 'User'}
                 </span>
+                
+                {/* My Orders Link */}
+                <Link 
+                  to="/my-orders" 
+                  className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  <ClipboardList className="h-5 w-5" />
+                  <div className="hidden md:block">
+                    <div className="text-xs text-gray-500">My</div>
+                    <div className="text-sm font-semibold">Orders</div>
+                  </div>
+                </Link>
+                
                 <Button
                   variant="ghost"
                   size="sm"
