@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -108,17 +109,54 @@ const Cart = () => {
       return;
     }
 
-    // Simulate order placement
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const orderItems = [...cartItems]; // Create a copy of cart items
-      clearCart();
+      // Create the order in the database
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          total_amount: totalAmount,
+          status: 'processing',
+          shipping_address: 'Default shipping address' // You can enhance this with a proper address form
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: orderData.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.products.price
+      }));
+
+      const { error: orderItemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (orderItemsError) throw orderItemsError;
+
+      // Clear the cart after successful order creation
+      await clearCart();
+
       toast({
         title: "Order placed successfully!",
         description: "Your order will be delivered within 3-5 business days",
       });
-      navigate('/order-confirmation', { state: { orderItems: orderItems, totalAmount } });
+
+      // Navigate to order confirmation with the order ID
+      navigate('/order-confirmation', { 
+        state: { 
+          orderId: orderData.id,
+          orderItems: cartItems, 
+          totalAmount 
+        } 
+      });
+
     } catch (error) {
+      console.error('Error creating order:', error);
       toast({
         title: "Order failed",
         description: "Please try again later",
@@ -235,12 +273,11 @@ const Cart = () => {
               </div>
               
               <Button 
-            
-                    onClick={handleCheckout}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    size="lg"
-                  >
-              
+                onClick={handleCheckout}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                size="lg"
+                disabled={cartItems.length === 0}
+              >
                 Proceed to Checkout
               </Button>
             </div>
